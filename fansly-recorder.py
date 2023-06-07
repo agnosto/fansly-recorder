@@ -18,8 +18,11 @@ headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
     }
 
+resolver = aiohttp.resolver.AsyncResolver(nameservers=['8.8.8.8'])
+connector = aiohttp.TCPConnector(resolver=resolver)
+
 async def getAccountData(account_url):    
-    async with aiohttp.ClientSession(headers=headers) as session:
+    async with aiohttp.ClientSession(connector=connector, headers=headers) as session:
         async with session.get(account_url) as response:
             json_data = await response.json()
             if not json_data['success'] or len(json_data['response']) == 0:
@@ -40,7 +43,7 @@ async def getAccountData(account_url):
     return metadata
 
 async def getStreamData(stream_url):
-    async with aiohttp.ClientSession(headers=headers) as session:
+    async with aiohttp.ClientSession(connector=connector, headers=headers) as session:
         async with session.get(stream_url) as response:
             data = await response.json()
 
