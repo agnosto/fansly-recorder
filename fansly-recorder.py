@@ -109,6 +109,8 @@ async def startRecording(user_Data, data):
     # Delete the .ts file
     os.remove(ts_filename)
 
+    print(f"[ffmpeg] Done saving livestream to {mp4_filename}")
+
     with rclone.with_config(rcloneConfig) as cfg:
         fs = rclone.with_config(cfg).new_fs("remote")
         fs.move(mp4_filename, rcloneRemotePath, verbose=True)
