@@ -55,6 +55,12 @@ python fansly-recorder.py {username}
 
 press `ctrl + b` then `d` to detach from the session.
 
+Alternatively, you can use the `start.sh` script to create the tmux instances and run the script:
+
+```
+bash start.sh {username}
+``` 
+
 [more on tmux](https://www.hamvocke.com/blog/a-quick-and-easy-guide-to-tmux/)
 
 
