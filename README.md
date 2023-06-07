@@ -10,6 +10,9 @@ This script allows you to record fansly streams live to a .ts file and automatic
 
 
 1. Install required python modules for the script:
+```
+pip install - r requirements.txt
+```
 2. Install and create a rclone remote (`rclone config`) if you don't already have one and then edit `fansly-recorder.py` and add the following:
 
    - The rclone config `cat $HOME/.config/rclone/rclone.conf` for the host you want to push the files to
