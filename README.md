@@ -1,10 +1,8 @@
 # Fansly Stream Recorder
 
-This script allows you to record fansly streams live to a .ts file and automatically upload the VOD to the cloud using rclone.
+This script allows you to record fansly streams live to a .mp4 file and automatically upload the VOD to the cloud using rclone.
 
 ⚠ Unsure if streams can be done behind a sub and not sure how this will handle that if possible.
-
-(may add converting .ts files to .mp4 prior to pushing to remote)
 
 # Setting up
 
