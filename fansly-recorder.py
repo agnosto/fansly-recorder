@@ -4,6 +4,8 @@ from datetime import datetime
 import ffmpeg
 import sys
 import rclone 
+import os
+import subprocess
 
 rcloneConfig = """
 [remote]
@@ -75,17 +77,17 @@ async def getStreamData(stream_url):
     return metadata
 
 async def ffmpegSync(filename, data):
-    print(f"[ffmpeg] Saving livestream to {filename}.mp4")
+    print(f"[ffmpeg] Saving livestream to {filename}.ts")
     
     (
         ffmpeg
         .input(data["response"]["stream"]["playbackUrl"], re=None)
-        .output(f'{filename}.mp4', c='copy')
+        .output(f'{filename}.ts', c='copy')
         .global_args('-loglevel', 'quiet')
         .run()
     )
 
-    print(f"[ffmpeg] Done saving livestream to {filename}.mp4")
+    print(f"[ffmpeg] Done saving livestream to {filename}.ts")
 
 async def startRecording(user_Data, data):
     global checkTimeout
@@ -94,9 +96,22 @@ async def startRecording(user_Data, data):
     
     await ffmpegSync(filename, data)
 
+    # Convert .ts file to .mp4
+    ts_filename = f"{filename}.ts"
+    mp4_filename = f"{filename}.mp4"
+    (
+        ffmpeg
+        .input(ts_filename, re=None)
+        .output(mp4_filename, c='copy')
+        .global_args('-loglevel', 'info', '-progress', '-')
+        .run(stdout=subprocess.PIPE)
+    )
+    # Delete the .ts file
+    os.remove(ts_filename)
+
     with rclone.with_config(rcloneConfig) as cfg:
         fs = rclone.with_config(cfg).new_fs("remote")
-        fs.move(f"{filename}.mp4", rcloneRemotePath, verbose=True)
+        fs.move(mp4_filename, rcloneRemotePath, verbose=True)
 
     print(f"[info] Stream complete. Resuming online check")
     await asyncio.sleep(checkTimeout)
