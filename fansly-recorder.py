@@ -75,17 +75,17 @@ async def getStreamData(stream_url):
     return metadata
 
 async def ffmpegSync(filename, data):
-    print(f"[ffmpeg] Saving livestream to {filename}.ts")
+    print(f"[ffmpeg] Saving livestream to {filename}.mp4")
     
     (
         ffmpeg
         .input(data["response"]["stream"]["playbackUrl"], re=None)
-        .output(f'{filename}.ts', c='copy')
+        .output(f'{filename}.mp4', c='copy')
         .global_args('-loglevel', 'quiet')
         .run()
     )
 
-    print(f"[ffmpeg] Done saving livestream to {filename}.ts")
+    print(f"[ffmpeg] Done saving livestream to {filename}.mp4")
 
 async def startRecording(user_Data, data):
     global checkTimeout
@@ -96,7 +96,7 @@ async def startRecording(user_Data, data):
 
     with rclone.with_config(rcloneConfig) as cfg:
         fs = rclone.with_config(cfg).new_fs("remote")
-        fs.move(f"{filename}.ts", rcloneRemotePath, verbose=True)
+        fs.move(f"{filename}.mp4", rcloneRemotePath, verbose=True)
 
     print(f"[info] Stream complete. Resuming online check")
     await asyncio.sleep(checkTimeout)
