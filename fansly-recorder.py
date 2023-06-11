@@ -104,7 +104,7 @@ async def startRecording(user_Data, data):
         .input(ts_filename, re=None)
         .output(mp4_filename, c='copy')
         .global_args('-loglevel', 'info', '-progress', '-')
-        .run(stdout=subprocess.PIPE)
+        .run()
     )
     # Delete the .ts file
     os.remove(ts_filename)
