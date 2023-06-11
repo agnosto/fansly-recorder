@@ -18,3 +18,4 @@ rclone==0.4.4
 tqdm==4.65.0
 win32-setctime==1.1.0
 yarl==1.9.2
+python-rclone==0.0.2
