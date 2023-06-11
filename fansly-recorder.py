@@ -103,7 +103,7 @@ async def startRecording(user_Data, data):
         ffmpeg
         .input(ts_filename, re=None)
         .output(mp4_filename, c='copy')
-        .global_args('-loglevel', 'info', '-progress', '-')
+        .global_args('-loglevel', 'quiet')
         .run()
     )
     # Delete the .ts file
