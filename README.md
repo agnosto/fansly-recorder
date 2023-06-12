@@ -1,6 +1,6 @@
 # Fansly Stream Recorder
 
-This script allows you to record fansly streams live to a .mp4 file and automatically upload the VOD to the cloud using rclone.
+This script allows you to record fansly streams live to a .mp4 file and automatically upload the VOD to the cloud using rclone, and uses discord webhooks to keep you updated on the status(stream start/file conversion/upload).
 
 ⚠ Unsure if streams can be done behind a sub and not sure how this will handle that if possible.
 
@@ -11,6 +11,7 @@ This script allows you to record fansly streams live to a .mp4 file and automati
 ```
 pip install - r requirements.txt
 ```
+Alongside installing [mt](https://github.com/mutschler/mt#installation-from-source) to genereate a contact-sheet of the live.
 2. Install and create a rclone remote (`rclone config`) if you don't already have one and then edit `fansly-recorder.py` and add the following:
 
    - The rclone config `cat $HOME/.config/rclone/rclone.conf` for the host you want to push the files to
