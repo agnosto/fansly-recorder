@@ -2,7 +2,7 @@
 
 This script allows you to record fansly streams live to a .mp4 file and automatically upload the VOD to the cloud using rclone, and uses discord webhooks to keep you updated on the status(stream start/file conversion/upload).
 
-⚠ Unsure if streams can be done behind a sub and not sure how this will handle that if possible.
+⚠ This only works on public streams that don't require following/subs.
 
 # Setting up
 
