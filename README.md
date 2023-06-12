@@ -8,10 +8,12 @@ This script allows you to record fansly streams live to a .mp4 file and automati
 
 
 1. Install required python modules for the script:
-```
-pip install - r requirements.txt
-```
-Alongside installing [mt](https://github.com/mutschler/mt#installation-from-source) to genereate a contact-sheet of the live.
+
+   ```
+   pip install -r requirements.txt
+   ```
+
+   Alongside installing [mt](https://github.com/mutschler/mt#installation-from-source) to genereate a contact-sheet of the live.
 2. Install and create a rclone remote (`rclone config`) if you don't already have one and then edit `fansly-recorder.py` and add the following:
 
    - The rclone config `cat $HOME/.config/rclone/rclone.conf` for the host you want to push the files to
@@ -28,6 +30,8 @@ token = {"access_token":"......."...}
 """
 rcloneRemotePath = "remote:path/to/FanslyVods/"
 ```
+
+3. Replace instances of `webhook_url` to your webhook url for your notify channel. 
 
 # Running
 
