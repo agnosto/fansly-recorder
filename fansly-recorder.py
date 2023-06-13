@@ -7,6 +7,8 @@ import rclone
 import os
 import subprocess
 
+from os.path import expanduser
+
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
 rcloneConfig = """
@@ -136,7 +138,7 @@ async def convertToMP4(filename):
 async def generateContactSheet(mp4_filename):
     contact_sheet_filename = f"{os.path.splitext(mp4_filename)[0]}.jpg"
     subprocess.run([
-        "mt",
+        "./mt",
         "--columns=4",
         "--numcaps=24",
         "--header-meta",
@@ -150,8 +152,10 @@ async def generateContactSheet(mp4_filename):
 async def uploadRecording(mp4_filename):
     contact_sheet_filename = await generateContactSheet(mp4_filename)
 
-    with rclone.with_config(rcloneConfig) as cfg:
-        fs = rclone.with_config(cfg).new_fs("remote")
+    with open(expanduser('~/.config/rclone/rclone.conf')) as config_file:
+        config = config_file.read()
+    #with rclone.with_config(rcloneConfig) as cfg:
+        fs = rclone.with_config(config).new_fs("remote")
         fs.move(mp4_filename, rcloneRemotePath, verbose=True)
         fs.move(contact_sheet_filename, rcloneRemotePath, verbose=True)
 
