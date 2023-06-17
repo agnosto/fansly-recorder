@@ -152,12 +152,10 @@ async def generateContactSheet(mp4_filename):
 async def uploadRecording(mp4_filename):
     contact_sheet_filename = await generateContactSheet(mp4_filename)
 
-    with open(expanduser('~/.config/rclone/rclone.conf')) as config_file:
-        config = config_file.read()
-    #with rclone.with_config(rcloneConfig) as cfg:
-        fs = rclone.with_config(config).new_fs("remote")
-        fs.move(mp4_filename, rcloneRemotePath, verbose=True)
-        fs.move(contact_sheet_filename, rcloneRemotePath, verbose=True)
+    rclone.with_config(rcloneConfig).run_cmd(command="move", extra_args=[contact_sheet_filename, rcloneRemotePath])
+
+    rclone.with_config(rcloneConfig).run_cmd(command="move", extra_args=[mp4_filename, rcloneRemotePath])
+
 
     # Send Discord notification that upload is complete
     webhook_url = "https://discord.com/api/webhooks/1234567890/abcde"  # Replace with your webhook URL
