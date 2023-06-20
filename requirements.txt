@@ -17,7 +17,6 @@ multidict==6.0.4
 pycares==4.3.0
 pycparser==2.21
 python-rclone==0.0.2
-rclone==0.4.4
 requests==2.31.0
 tqdm==4.65.0
 urllib3==2.0.3
