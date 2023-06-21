@@ -157,13 +157,15 @@ async def uploadRecording(mp4_filename):
         webhook = DiscordWebhook(url=webhook_url)
         mp4_name = os.path.basename(mp4_filename)
         sheet_name = os.path.basename(contact_sheet_filename)
+        mention = "<@!123456789>"  # Replace with the user or role ID you want to mention (@! for user id,@& for role )
         
         # Create DiscordEmbed object
         embed = DiscordEmbed(title='Stream Recording Uploading', color='03b2f8')
         embed.set_image(url=f"attachment://{sheet_name}")
+        embed.set_timestamp()
         
         # Add message and embed to webhook
-        webhook.content = f"Uploading {mp4_name} with contact sheet {sheet_name}"
+        webhook.content = f"{mention} Uploading {mp4_name} with contact sheet {sheet_name}"
         webhook.add_file(file=open(contact_sheet_filename, 'rb'), filename=sheet_name)
         webhook.add_embed(embed)
 
