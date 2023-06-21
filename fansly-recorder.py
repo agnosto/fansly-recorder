@@ -151,12 +151,6 @@ async def generateContactSheet(mp4_filename):
 
 async def uploadRecording(mp4_filename):
     contact_sheet_filename = await generateContactSheet(mp4_filename)
-
-    rclone.with_config(rcloneConfig).run_cmd(command="move", extra_args=[contact_sheet_filename, rcloneRemotePath])
-
-    rclone.with_config(rcloneConfig).run_cmd(command="move", extra_args=[mp4_filename, rcloneRemotePath])
-
-
     # Send Discord notification that upload is complete
     webhook_url = "https://discord.com/api/webhooks/1234567890/abcde"  # Replace with your webhook URL
     if webhook_url is not None:
@@ -165,11 +159,11 @@ async def uploadRecording(mp4_filename):
         sheet_name = os.path.basename(contact_sheet_filename)
         
         # Create DiscordEmbed object
-        embed = DiscordEmbed(title='Stream Recording Uploaded', color='03b2f8')
+        embed = DiscordEmbed(title='Stream Recording Uploading', color='03b2f8')
         embed.set_image(url=f"attachment://{sheet_name}")
         
         # Add message and embed to webhook
-        webhook.content = f"Uploaded {mp4_name} with contact sheet {sheet_name}"
+        webhook.content = f"Uploading {mp4_name} with contact sheet {sheet_name}"
         webhook.add_file(file=open(contact_sheet_filename, 'rb'), filename=sheet_name)
         webhook.add_embed(embed)
 
@@ -180,6 +174,8 @@ async def uploadRecording(mp4_filename):
         else:
             print(f"[warning] Failed to send webhook notification: {response.status_code} {response.reason}")
 
+    rclone.with_config(rcloneConfig).run_cmd(command="move", extra_args=[contact_sheet_filename, rcloneRemotePath])
+    rclone.with_config(rcloneConfig).run_cmd(command="move", extra_args=[mp4_filename, rcloneRemotePath])
 
 async def startRecording(user_Data, data):
     global checkTimeout
