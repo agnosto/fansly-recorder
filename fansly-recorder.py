@@ -99,13 +99,8 @@ async def getStreamData(stream_url):
 async def ffmpegSync(filename, data):
     print(f"[ffmpeg] Saving livestream to {filename}.ts")
     
-    (
-        ffmpeg
-        .input(data["response"]["stream"]["playbackUrl"], re=None)
-        .output(f'{filename}.ts', c='copy')
-        .global_args('-loglevel', 'quiet')
-        .run()
-    )
+    command = f'ffmpeg -i {data["response"]["stream"]["playbackUrl"]} -c copy -movflags use_metadata_tags -map_metadata 0 -timeout 300 -reconnect 300 -reconnect_at_eof 300 -reconnect_streamed 300 -reconnect_delay_max 300 -rtmp_live live {filename}.ts'
+    subprocess.run(command, shell=True, check=True)
     
     print(f"[ffmpeg] Done saving livestream to {filename}.ts")
 
