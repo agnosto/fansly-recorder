@@ -107,6 +107,10 @@ async def ffmpegSync(filename, data):
 async def convertToMP4(filename):
     ts_filename = f"{filename}.ts"
     mp4_filename = f"{filename}.mp4"
+
+    # Uncomment this and comment block the ffmpeg command below to have "faster conversion" in case stream download gets cut short
+    #os.rename(ts_filename, mp4_filename)
+
     (
         ffmpeg
         .input(ts_filename, re=None)
@@ -155,12 +159,13 @@ async def uploadRecording(mp4_filename):
         mention = "<@!123456789>"  # Replace with the user or role ID you want to mention (@! for user id,@& for role )
         
         # Create DiscordEmbed object
-        embed = DiscordEmbed(title='Stream Recording Uploading', color='03b2f8')
+        embed = DiscordEmbed(title='Stream Recording Uploaded', description=f'Uploaded {mp4_name} with contact sheet {sheet_name}', color='03b2f8')
         embed.set_image(url=f"attachment://{sheet_name}")
         embed.set_timestamp()
         
         # Add message and embed to webhook
-        webhook.content = f"{mention} Uploading {mp4_name} with contact sheet {sheet_name}"
+        # uncomment to be pinged for contact sheet and upload info 
+        #webhook.content = f"{mention} Uploading {mp4_name} with contact sheet {sheet_name}"
         webhook.add_file(file=open(contact_sheet_filename, 'rb'), filename=sheet_name)
         webhook.add_embed(embed)
 
