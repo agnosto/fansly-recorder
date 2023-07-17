@@ -191,6 +191,7 @@ async def startRecording(user_Data, data):
     await uploadRecording(mp4_filename)
 
     # Delete the .ts file
+    # Comment these out if you uncommented line 112 to just rename the file.
     ts_filename = f"{filename}.ts"
     os.remove(ts_filename)
 
