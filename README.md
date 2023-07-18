@@ -33,7 +33,7 @@ token = {"access_token":"......."...}
 rcloneRemotePath = "remote:path/to/FanslyVods/"
 ```
 
-3. Replace instances of `webhook_url` to your webhook url for your notify channel, as well as replacing the id in `mention` for the role or user id to ping.  
+3. Replace instances of `webhook_url` to your webhook url for your notify channel, as well as replacing the id in `mention` for the role or user id to ping. As well as other small changes that will have comments to let you know. 
 
 # Running
 
