@@ -22,12 +22,9 @@ token = THIS
 rcloneRemotePath = "remote:FanslyVODS/"
 
 checkTimeout = (5 * 60)
-headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
-    }
 
 async def getAccountData(account_url):
-    resolver = aiohttp.resolver.AsyncResolver(nameservers=['8.8.8.8'])
+    resolver = aiohttp.resolver.AsyncResolver(nameservers=['8.8.8.8', '8.8.8.4', '1.1.1.1', '1.0.0.2'])
     connector = aiohttp.TCPConnector(resolver=resolver)    
     async with aiohttp.ClientSession(connector=connector, headers=config.headers) as session:
         async with session.get(account_url) as response:
@@ -66,7 +63,7 @@ async def getAccountData(account_url):
     return metadata
 
 async def getStreamData(stream_url):
-    resolver = aiohttp.resolver.AsyncResolver(nameservers=['8.8.8.8'])
+    resolver = aiohttp.resolver.AsyncResolver(nameservers=['8.8.8.8', '8.8.8.4', '1.1.1.1', '1.0.0.2'])
     connector = aiohttp.TCPConnector(resolver=resolver)
     async with aiohttp.ClientSession(connector=connector, headers=config.headers) as session:
         async with session.get(stream_url) as response:
@@ -110,31 +107,34 @@ async def convertToMP4(filename):
     ts_filename = f"{filename}.ts"
     mp4_filename = f"{filename}.mp4"
 
-    # Uncomment this and comment block the ffmpeg command below to have "faster conversion" in case stream download gets cut short
-    #os.rename(ts_filename, mp4_filename)
+    if config.ffmpeg_convert == True:
+        (
+            ffmpeg
+            .input(ts_filename, re=None)
+            .output(mp4_filename, vcodec='copy', acodec='copy')
+            .global_args('-loglevel', 'quiet')
+            .run()
+        )
+    else:
+        os.rename(ts_filename, mp4_filename)
 
-    (
-        ffmpeg
-        .input(ts_filename, re=None)
-        .output(mp4_filename, vcodec='copy', acodec='copy')
-        .global_args('-loglevel', 'quiet')
-        .run()
-    )
+    if config.webhooks.enabled == True:
 
-    # Send Discord notification that conversion is complete
-    webhook_url = "https://discord.com/api/webhooks/1234567890/abcde"  # Replace with your webhook URL
-    if webhook_url is not None:
-        webhook = DiscordWebhook(url=webhook_url)
+        # Send Discord notification that conversion is complete
+        webhook_url = config.webhooks['info_webhook']
+        if webhook_url is not None:
+            webhook = DiscordWebhook(url=webhook_url)
         # Set message content
-        mp4_name = os.path.basename(mp4_filename)
-        webhook.content = f"Converted {filename}.ts to {mp4_name}"
-        response = webhook.execute()
-        if response.status_code == 200:
-            print(f"[info] Sent Discord notification that {filename}.ts was converted to {mp4_name}")
-        else:
-            print(f"[warning] Failed to send webhook notification: {response.status_code} {response.reason}")
-
-    return mp4_filename
+            mp4_name = os.path.basename(mp4_filename)
+            webhook.content = f"Converted {filename}.ts to {mp4_name}"
+            response = webhook.execute()
+            if response.status_code == 200:
+                print(f"[info] Sent Discord notification that {filename}.ts was converted to {mp4_name}")
+            else:
+                print(f"[warning] Failed to send webhook notification: {response.status_code} {response.reason}")
+        return mp4_filename
+    else:
+        return mp4_filename
 
 async def generateContactSheet(mp4_filename):
     contact_sheet_filename = f"{os.path.splitext(mp4_filename)[0]}.jpg"
@@ -150,35 +150,35 @@ async def generateContactSheet(mp4_filename):
     ])
     return contact_sheet_filename
 
-async def uploadRecording(mp4_filename):
-    contact_sheet_filename = await generateContactSheet(mp4_filename)
-    # Send Discord notification that upload is complete
-    webhook_url = "https://discord.com/api/webhooks/1234567890/abcde"  # Replace with your webhook URL
-    if webhook_url is not None:
-        webhook = DiscordWebhook(url=webhook_url)
-        mp4_name = os.path.basename(mp4_filename)
-        sheet_name = os.path.basename(contact_sheet_filename)
-        mention = "<@!123456789>"  # Replace with the user or role ID you want to mention (@! for user id,@& for role )
+async def uploadRecording(mp4_filename, contact_sheet_filename):
+    
+    if config.webhooks.enabled == True:
+        # Send Discord notification that upload is complete
+        webhook_url = config.webhooks['info_webhook']  
+        if webhook_url is not None:
+            webhook = DiscordWebhook(url=webhook_url)
+            mp4_name = os.path.basename(mp4_filename)
+            sheet_name = os.path.basename(contact_sheet_filename)
+            mention = config.webhooks['webhook_mention'] 
         
-        # Create DiscordEmbed object
-        embed = DiscordEmbed(title='Stream Recording Uploaded', description=f'Uploaded {mp4_name} with contact sheet {sheet_name}', color='03b2f8')
-        embed.set_image(url=f"attachment://{sheet_name}")
-        embed.set_timestamp()
+            # Create DiscordEmbed object
+            embed = DiscordEmbed(title='Stream Recording Uploaded', description=f'Uploaded {mp4_name} with contact sheet {sheet_name}', color='03b2f8')
+            embed.set_image(url=f"attachment://{sheet_name}")
+            embed.set_timestamp()
         
-        # Add message and embed to webhook
-        # uncomment to be pinged for contact sheet and upload info 
-        #webhook.content = f"{mention} Uploading {mp4_name} with contact sheet {sheet_name}"
-        webhook.add_file(file=open(contact_sheet_filename, 'rb'), filename=sheet_name)
-        webhook.add_embed(embed)
+            # Add message and embed to webhook
+            webhook.content = f"{mention} Vod Uploaded"
+            webhook.add_embed(embed)
 
-        # Send webhook message
-        response = webhook.execute()
-        if response.status_code == 200:
-            print(f"[info] Sent Discord notification that {mp4_name} was uploaded")
-        else:
-            print(f"[warning] Failed to send webhook notification: {response.status_code} {response.reason}")
-
-    rclone.with_config(rcloneConfig).run_cmd(command="move", extra_args=[contact_sheet_filename, rcloneRemotePath])
+            # Send webhook message
+            response = webhook.execute()
+            if response.status_code == 200:
+                print(f"[info] Sent Discord notification that {mp4_name} was uploaded")
+            else:
+                print(f"[warning] Failed to send webhook notification: {response.status_code} {response.reason}")
+    
+    if config.mt == True:
+        rclone.with_config(rcloneConfig).run_cmd(command="move", extra_args=[contact_sheet_filename, rcloneRemotePath])
     rclone.with_config(rcloneConfig).run_cmd(command="move", extra_args=[mp4_filename, rcloneRemotePath])
 
 async def startRecording(user_Data, data):
@@ -190,22 +190,29 @@ async def startRecording(user_Data, data):
 
     # Convert .ts file to .mp4
     mp4_filename = await convertToMP4(filename)
-    await uploadRecording(mp4_filename)
 
-    # Delete the .ts file
-    # Comment these out if you uncommented line 112 to just rename the file.
-    ts_filename = f"{filename}.ts"
-    os.remove(ts_filename)
+    if config.mt == True:
+        contact_sheet_filename = await generateContactSheet(mp4_filename)
+
+    if config.upload == True and config.mt == True:
+        await uploadRecording(mp4_filename, contact_sheet_filename)
+    elif config.upload == True:
+        await uploadRecording(mp4_filename)
+
+    if config.ffmpeg_convert == True:
+        # Delete the .ts file
+        ts_filename = f"{filename}.ts"
+        os.remove(ts_filename)
 
     print(f"[info] Stream complete. Resuming online check")
     await asyncio.sleep(checkTimeout)
 
 async def sendWebhookLive(user_Data):
-    webhook_url_startstream = "https://discord.com/api/webhooks/1234567890/abcde"  # Replace with your start stream webhook URL
+    webhook_url_startstream = config.webhooks['live_webhook'] 
     webhook = DiscordWebhook(url=webhook_url_startstream)
 
     live_url = f"https://fansly.com/live/{user_Data['response'][0]['username']}"
-    mention = "<@!123456789>"  # Replace with the user or role ID you want to mention (@! for user id,@& for role )
+    mention = config.webhooks['webhook_mention']
     content = f"{mention} {user_Data['response'][0]['username']} is now live on Fansly!"
     embed_live = DiscordEmbed(title='Stream Live!', color='03b2f8', url=live_url,)
     embed_live.set_author(name=f"{user_Data['response'][0]['username']}", icon_url=f"{user_Data['response'][0]['avatar']['variants'][0]['locations'][0]['location']}")
@@ -238,9 +245,12 @@ async def Start():
         data = await getStreamData(stream_url)
 
         if data is not None and data['success']:
-            await sendWebhookLive(user_Data)
-            #print(f"[info] {user_Data['response'][0]['username']} Stream is online, starting archiver")
-            await startRecording(user_Data, data)
+            if config.webhooks.enabled == True:
+                await sendWebhookLive(user_Data)
+                await startRecording(user_Data, data)
+            else:
+                print(f"[info] {user_Data['response'][0]['username']} Stream is online, starting archiver")
+                await startRecording(user_Data, data)
         else:
             print(f"[info] {user_Data['response'][0]['username']} is offline, checking again in {checkTimeout}s")
             await asyncio.sleep(checkTimeout)

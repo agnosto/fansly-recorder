@@ -1,22 +1,44 @@
 # Fansly Stream Recorder
 
-This script allows you to record fansly streams live to a .mp4 file and automatically upload the VOD to the cloud using rclone, and uses discord webhooks to keep you updated on the status(stream start/file conversion/upload).
+This script allows you to record fansly streams live to a .mp4 file and allows automatically uploading the VOD to a cloud service using rclone, and uses discord webhooks to keep you updated on the status(stream start/file conversion/upload).
 
-⚠ This only works on public streams that don't require following/subs.
+⚠ This is currently under development, everything is still being planned out and tested. Feel free to use and create any issues to help with the development of it.
 
-ℹ You may be able to add your cookies to the headers to be able to record streams of followed/subbed models. (I don't actively follow many models, especially ones that go live on the platform to test) 
+> Thanks to the guys working on [Fansly downloader](https://github.com/Avnsx/fansly-downloader) for the new headers used here :).
+### Table of Contents
+<details>
+  <summary>Click to expand!</summary>
+  
+  * [Requirements](#requirements)
+  * [Setting up](#setting-up)
+     * [Getting Account Token](#getting-fansly-account-token)
+   * [Running](#running)
+   * [Disclaimer](#super-serious-and-needed-disclaimer)
+   * [Troubleshoot](#troubleshoot)
+      * [Hanging on start](#hanging-on-start)
+</details>
+
+
+# Requirements
+
+- [python](https://www.python.org/downloads/) - 3.10 or higher (latest should be fine, add to PATH).
+- [ffmpeg](https://ffmpeg.org/) - [adding to path](https://phoenixnap.com/kb/ffmpeg-windows) on windows*.
+- [rclone](https://rclone.org/downloads/)
+- [python-rclone](https://github.com/ddragosd/python-rclone)
+- [mt](https://github.com/mutschler/mt) - thumbnail sheet generator (the script uses prebuilt binaries from the repo, download and place in the same folder as the script.)
+
+*Alternatively on windows, you can install [chocolatey](https://chocolatey.org/install) to install some of the required programs. 
 
 # Setting up
-
 
 1. Install required python modules for the script:
 
    ```
    pip install -r requirements.txt
    ```
+2. Edit `config.py` to add your fansly [account token](#getting-fansly-aount-token) and configure what you want enabled.
 
-   Alongside installing [mt](https://github.com/mutschler/mt#installation-from-source) to genereate a contact-sheet of the live.
-2. Install and create a rclone remote (`rclone config`) if you don't already have one and then edit `fansly-recorder.py` and add the following:
+3. Install and create a rclone remote (`rclone config`) if you don't already have one and then edit `fansly-recorder.py` and add the following:
 
    - The rclone config `cat $HOME/.config/rclone/rclone.conf` for the host you want to push the files to
    - The remote path to `rcloneRemotePath`
@@ -33,20 +55,29 @@ token = {"access_token":"......."...}
 rcloneRemotePath = "remote:path/to/FanslyVods/"
 ```
 
-3. Replace instances of `webhook_url` to your webhook url for your notify channel, as well as replacing the id in `mention` for the role or user id to ping. As well as other small changes that will have comments to let you know. 
+## Getting Fansly Account Token
+
+1. go to [fansly](https://fansly.om) and login and open devtools.
+
+2. In network request, type `method:GET api` and refresh and click on one of the request
+
+3. Look under `Request Headers` and look for `Authorization:` and copy the value
+
+<p align="center"><img src="./assets/token-step-1.png">
+<p align="center"><img src="./assets/token-step-2.png">
 
 # Running
 
-The script will continue to loop and check for the model to be live and then start to record, once finished it will push the file to the remote and go back to checking for the model to be live again.
+The script will continue to loop and check for the model to be live every 5 minutes and then start to record, once finished it will push the file to the remote and go back to checking for the model to be live again.
 
 
-Run the script
+Run the script:
 
 ```
-python fansly-recorder.py {username}
+python3 fansly-recorder.py {username}
 ```
 
-Recommend to run the script in tmux to be able to close the terminal.
+Recommended to run the script in tmux to be able to close the terminal session.
 
 Create a new tmux session:
 
@@ -70,8 +101,19 @@ bash start.sh {username}
 
 [more on tmux](https://www.hamvocke.com/blog/a-quick-and-easy-guide-to-tmux/)
 
+# Troubleshoot
 
-# Super Serious And Needed Disclaimer:
+### Hanging on start
+If running locally, you may expierince hanging of the script. To get around this you'll need to edit `fansly-recorder.py` a bit. Under the `getAccountData` and `getStreamData` functions, you'll want to change the following line:
+```py
+async with aiohttp.ClientSession(connector=connector, headers=config.headers) as session:
+```
+to the following:
+```py
+async with aiohttp.ClientSession(headers=config.headers) as session:
+```
+
+# Super Serious And Needed Disclaimer
 
 > "Fansly" is operated by Select Media LLC 👺.
 >
