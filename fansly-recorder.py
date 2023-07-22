@@ -11,6 +11,8 @@ from os.path import expanduser
 
 from discord_webhook import DiscordWebhook, DiscordEmbed
 
+import config
+
 rcloneConfig = """
 [remote]
 type = REPLACE
@@ -27,7 +29,7 @@ headers = {
 async def getAccountData(account_url):
     resolver = aiohttp.resolver.AsyncResolver(nameservers=['8.8.8.8'])
     connector = aiohttp.TCPConnector(resolver=resolver)    
-    async with aiohttp.ClientSession(connector=connector, headers=headers) as session:
+    async with aiohttp.ClientSession(connector=connector, headers=config.headers) as session:
         async with session.get(account_url) as response:
             json_data = await response.json()
             if not json_data['success'] or len(json_data['response']) == 0:
@@ -66,7 +68,7 @@ async def getAccountData(account_url):
 async def getStreamData(stream_url):
     resolver = aiohttp.resolver.AsyncResolver(nameservers=['8.8.8.8'])
     connector = aiohttp.TCPConnector(resolver=resolver)
-    async with aiohttp.ClientSession(connector=connector, headers=headers) as session:
+    async with aiohttp.ClientSession(connector=connector, headers=config.headers) as session:
         async with session.get(stream_url) as response:
             data = await response.json()
 

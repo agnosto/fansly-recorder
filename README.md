@@ -71,7 +71,7 @@ bash start.sh {username}
 [more on tmux](https://www.hamvocke.com/blog/a-quick-and-easy-guide-to-tmux/)
 
 
-# Super Serious Needed Disclaimer:
+# Super Serious And Needed Disclaimer:
 
 > "Fansly" is operated by Select Media LLC 👺.
 >
