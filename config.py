@@ -1,6 +1,6 @@
 mt = True # Allows the generation of a contact sheet of thumbnails of the VOD if set to True
 upload = True # Allows the usage of rclone to push the VODs to a remote if set to True
-ffmpeg_convert = True # If True, uses ffmpeg to convert. If False, renames teh .ts file to .mp4 (quicker). 
+ffmpeg_convert = True # If True, uses ffmpeg to convert. If False, renames the .ts file to .mp4 (quicker). 
 webhooks = {
   'enabled': True,  # Set to False if you don't want to use webhooks to be notified
   'live_webhook': 'https://discord.com/api/webhooks/1234567890/abcde',  # Replace with the live webhook URL
