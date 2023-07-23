@@ -168,6 +168,7 @@ async def uploadRecording(mp4_filename, contact_sheet_filename):
         
             # Add message and embed to webhook
             webhook.content = f"{mention} Vod Uploaded"
+            webhook.add_file(file=open(contact_sheet_filename, 'rb'), filename=sheet_name)
             webhook.add_embed(embed)
 
             # Send webhook message
