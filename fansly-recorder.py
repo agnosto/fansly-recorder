@@ -121,7 +121,7 @@ async def convertToMP4(filename):
     if config.webhooks.enabled == True:
 
         # Send Discord notification that conversion is complete
-        webhook_url = config.webhooks['info_webhook']
+        webhook_url = config.webhooks.info_webhook
         if webhook_url is not None:
             webhook = DiscordWebhook(url=webhook_url)
         # Set message content
@@ -154,12 +154,12 @@ async def uploadRecording(mp4_filename, contact_sheet_filename):
     
     if config.webhooks.enabled == True:
         # Send Discord notification that upload is complete
-        webhook_url = config.webhooks['info_webhook']  
+        webhook_url = config.webhooks.info_webhook  
         if webhook_url is not None:
             webhook = DiscordWebhook(url=webhook_url)
             mp4_name = os.path.basename(mp4_filename)
             sheet_name = os.path.basename(contact_sheet_filename)
-            mention = config.webhooks['webhook_mention'] 
+            mention = config.webhooks.webhook_mention 
         
             # Create DiscordEmbed object
             embed = DiscordEmbed(title='Stream Recording Uploaded', description=f'Uploaded {mp4_name} with contact sheet {sheet_name}', color='03b2f8')
@@ -208,11 +208,11 @@ async def startRecording(user_Data, data):
     await asyncio.sleep(checkTimeout)
 
 async def sendWebhookLive(user_Data):
-    webhook_url_startstream = config.webhooks['live_webhook'] 
+    webhook_url_startstream = config.webhooks.live_webhook 
     webhook = DiscordWebhook(url=webhook_url_startstream)
 
     live_url = f"https://fansly.com/live/{user_Data['response'][0]['username']}"
-    mention = config.webhooks['webhook_mention']
+    mention = config.webhooks.webhook_mention
     content = f"{mention} {user_Data['response'][0]['username']} is now live on Fansly!"
     embed_live = DiscordEmbed(title='Stream Live!', color='03b2f8', url=live_url,)
     embed_live.set_author(name=f"{user_Data['response'][0]['username']}", icon_url=f"{user_Data['response'][0]['avatar']['variants'][0]['locations'][0]['location']}")

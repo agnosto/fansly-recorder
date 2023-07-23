@@ -1,12 +1,17 @@
+from collections import namedtuple
+
 mt = True # Allows the generation of a contact sheet of thumbnails of the VOD if set to True
 upload = True # Allows the usage of rclone to push the VODs to a remote if set to True
 ffmpeg_convert = True # If True, uses ffmpeg to convert. If False, renames the .ts file to .mp4 (quicker). 
-webhooks = {
-  'enabled': True,  # Set to False if you don't want to use webhooks to be notified
-  'live_webhook': 'https://discord.com/api/webhooks/1234567890/abcde',  # Replace with the live webhook URL
-  'info_webhook': 'https://discord.com/api/webhooks/1234567890/abcde',  # Replace with the info webhook URL
-  'webhook_mention': '<@!123456789>' # Replace with the user or role ID you want to mention (@! for user id,@& for role )
-}
+
+# Define a named tuple for Webhooks
+Webhooks = namedtuple('Webhooks', ['enabled', 'live_webhook', 'info_webhook', 'webhook_mention'])
+webhooks = Webhooks(
+  enabled=True,  # Set to False if you don't want to use webhooks to be notified
+  live_webhook='https://discord.com/api/webhooks/1234567890/abcde',  # Replace with the live webhook URL
+  info_webhook='https://discord.com/api/webhooks/1234567890/abcde',  # Replace with the info webhook URL
+  webhook_mention='<@!123456789>' # Replace with the user or role ID you want to mention (@! for user id,@& for role )
+)
 headers = {
         'authority': 'apiv3.fansly.com',
         'accept': 'application/json, text/plain, */*',
