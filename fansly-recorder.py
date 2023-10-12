@@ -21,7 +21,7 @@ token = THIS
 """
 rcloneRemotePath = "remote:FanslyVODS/"
 
-checkTimeout = (5 * 60)
+checkTimeout = (2 * 35)
 
 async def getAccountData(account_url):
     resolver = aiohttp.resolver.AsyncResolver(nameservers=['8.8.8.8', '8.8.8.4', '1.1.1.1', '1.0.0.2'])
@@ -72,7 +72,7 @@ async def getStreamData(stream_url):
     last_fetched = data['response']['stream']['lastFetchedAt']
     current_time = int(datetime.now().timestamp() * 1000)
 
-    if current_time - last_fetched > 4 * 60 * 1000:
+    if current_time - last_fetched > 1 * 60 * 1000:
         return None
     else:
 
@@ -95,17 +95,21 @@ async def getStreamData(stream_url):
     #print(metadata)
     return metadata
 
-async def ffmpegSync(filename, data):
-    print(f"[ffmpeg] Saving livestream to {filename}.ts")
+async def ffmpegSync(filename, data, user_Data):
+    directory = os.path.join('./captures', user_Data["response"][0]['username'])
+    os.makedirs(directory, exist_ok=True)
+    ts_filename = os.path.join(directory, f"{filename}.ts")
+    print(f"[ffmpeg] Saving livestream to {ts_filename}")
     
-    command = f'ffmpeg -i {data["response"]["stream"]["playbackUrl"]} -c copy -movflags use_metadata_tags -map_metadata 0 -timeout 300 -reconnect 300 -reconnect_at_eof 300 -reconnect_streamed 300 -reconnect_delay_max 300 -rtmp_live live {filename}.ts'
+    command = f'ffmpeg -i {data["response"]["stream"]["playbackUrl"]} -c copy -movflags use_metadata_tags -map_metadata 0 -timeout 300 -reconnect 300 -reconnect_at_eof 300 -reconnect_streamed 300 -reconnect_delay_max 300 -rtmp_live live {ts_filename}'
     subprocess.run(command, shell=True, check=True)
     
     print(f"[ffmpeg] Done saving livestream to {filename}.ts")
 
-async def convertToMP4(filename):
-    ts_filename = f"{filename}.ts"
-    mp4_filename = f"{filename}.mp4"
+async def convertToMP4(ts_filename):
+    mp4_filename = ts_filename.rsplit('.', 1)[0] + '.mp4'
+    #ts_filename = f"{filename}.ts"
+    #mp4_filename = f"{filename}.mp4"
 
     if config.ffmpeg_convert == True:
         (
@@ -184,13 +188,13 @@ async def uploadRecording(mp4_filename, contact_sheet_filename):
 
 async def startRecording(user_Data, data):
     global checkTimeout
-    started_at_datetime = datetime.fromtimestamp(data["response"]["stream"]["startedAt"] / 1000)
-    filename = f"{user_Data['response'][0]['username']}_{started_at_datetime.strftime('%Y%m%d_%H%M%S')}_v{data['response']['stream']['id']}"
+    current_datetime = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f"{user_Data['response'][0]['username']}_{current_datetime}_v{data['response']['stream']['id']}"
     
-    await ffmpegSync(filename, data)
+    ts_filename = await ffmpegSync(filename, data, user_Data)
 
     # Convert .ts file to .mp4
-    mp4_filename = await convertToMP4(filename)
+    mp4_filename = await convertToMP4(ts_filename)
 
     if config.mt == True:
         contact_sheet_filename = await generateContactSheet(mp4_filename)
@@ -202,7 +206,7 @@ async def startRecording(user_Data, data):
 
     if config.ffmpeg_convert == True:
         # Delete the .ts file
-        ts_filename = f"{filename}.ts"
+        #ts_filename = f"{filename}.ts"
         os.remove(ts_filename)
 
     print(f"[info] Stream complete. Resuming online check")
