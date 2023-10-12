@@ -21,7 +21,7 @@ token = THIS
 """
 rcloneRemotePath = "remote:FanslyVODS/"
 
-checkTimeout = (5 * 60)
+checkTimeout = (2 * 35)
 
 async def getAccountData(account_url):
     resolver = aiohttp.resolver.AsyncResolver(nameservers=['8.8.8.8', '8.8.8.4', '1.1.1.1', '1.0.0.2'])
@@ -72,7 +72,7 @@ async def getStreamData(stream_url):
     last_fetched = data['response']['stream']['lastFetchedAt']
     current_time = int(datetime.now().timestamp() * 1000)
 
-    if current_time - last_fetched > 4 * 60 * 1000:
+    if current_time - last_fetched > 1 * 60 * 1000:
         return None
     else:
 
