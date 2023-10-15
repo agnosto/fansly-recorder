@@ -105,6 +105,7 @@ async def ffmpegSync(filename, data, user_Data):
     subprocess.run(command, shell=True, check=True)
     
     print(f"[ffmpeg] Done saving livestream to {filename}.ts")
+    return ts_filename
 
 async def convertToMP4(ts_filename):
     mp4_filename = ts_filename.rsplit('.', 1)[0] + '.mp4'
