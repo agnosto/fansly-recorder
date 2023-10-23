@@ -134,7 +134,7 @@ async def convertToMP4(ts_filename):
             webhook.content = f"Converted {filename}.ts to {mp4_name}"
             response = webhook.execute()
             if response.status_code == 200:
-                print(f"[info] Sent Discord notification that {filename}.ts was converted to {mp4_name}")
+                print(f"[info] Sent Discord notification that {ts_filename} was converted to {mp4_name}")
             else:
                 print(f"[warning] Failed to send webhook notification: {response.status_code} {response.reason}")
         return mp4_filename
