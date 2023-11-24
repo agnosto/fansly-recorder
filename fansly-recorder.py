@@ -71,8 +71,9 @@ async def getStreamData(stream_url):
 
     last_fetched = data['response']['stream']['lastFetchedAt']
     current_time = int(datetime.now().timestamp() * 1000)
+    access = data['response']['stream']['access']
 
-    if current_time - last_fetched > 4 * 60 * 1000:
+    if current_time - last_fetched > 4 * 60 * 1000 or access == 'false':
         return None
     else:
 
