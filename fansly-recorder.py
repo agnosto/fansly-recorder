@@ -73,8 +73,8 @@ async def getStreamData(stream_url):
     current_time = int(datetime.now().timestamp() * 1000)
     access = data['response']['stream']['access']
 
-    if current_time - last_fetched > 4 * 60 * 1000 or access == 'false':
-        return None
+    if current_time - last_fetched > 4 * 60 * 1000 or access == False:
+        return {"success": False, "response": None}
     else:
 
         metadata = {
@@ -251,7 +251,7 @@ async def Start():
     while True:
         data = await getStreamData(stream_url)
 
-        if data is not None and data['success']:
+        if data is not None and data['success'] and data['response']['stream']['access']:
             if config.webhooks.enabled == True:
                 await sendWebhookLive(user_Data)
                 await startRecording(user_Data, data)
