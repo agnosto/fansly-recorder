@@ -1,0 +1,6 @@
+procs:
+  username1:
+    shell: "python3 fansly-recorder.py username1"
+  username2:
+    shell: "python3 fansly-recorder.py username2"
+

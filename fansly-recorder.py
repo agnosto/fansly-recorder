@@ -24,34 +24,34 @@ rcloneRemotePath = "remote:FanslyVODS/"
 checkTimeout = (5 * 60)
 
 async def getAccountData(account_url):
-    resolver = aiohttp.resolver.AsyncResolver(nameservers=['8.8.8.8', '8.8.8.4', '1.1.1.1', '1.0.0.2'])
+    resolver = aiohttp.resolver.AsyncResolver(nameservers=["8.8.8.8", "8.8.8.4", "1.1.1.1", "1.0.0.2"])
     connector = aiohttp.TCPConnector(resolver=resolver)    
     async with aiohttp.ClientSession(connector=connector, headers=config.headers) as session:
         async with session.get(account_url) as response:
             json_data = await response.json()
-            if not json_data['success'] or len(json_data['response']) == 0:
-                print('Error: could not retrieve account data')
+            if not json_data["success"] or len(json_data["response"]) == 0:
+                print("Error: could not retrieve account data")
                 exit()
             #account_id = json_data['response'][0]['id']
     #return account_id            
             metadata = {
-              "success": json_data['success'],
+              "success": json_data["success"],
               "response": [
                   {
-                      "id": json_data['response'][0]['id'],
-                      "username": json_data['response'][0]['username'],
+                      "id": json_data["response"][0]["id"],
+                      "username": json_data["response"][0]["username"],
                       "avatar": {
-                        "id": json_data['response'][0]['avatar']['id'],
-                        "mimetype": json_data['response'][0]['avatar']['mimetype'],
-                        "location": json_data['response'][0]['avatar']['location'],
+                        "id": json_data["response"][0]["avatar"]["id"],
+                        "mimetype": json_data["response"][0]["avatar"]["mimetype"],
+                        "location": json_data["response"][0]["avatar"]["location"],
                         "variants": [
                             {
-                            "id": json_data['response'][0]['avatar']['variants'][0]['id'],
-                            "mimetype": json_data['response'][0]['avatar']['variants'][0]['mimetype'],
-                            "location": json_data['response'][0]['avatar']['variants'][0]['location'],
+                            "id": json_data["response"][0]["avatar"]["variants"][0]["id"],
+                            "mimetype": json_data["response"][0]["avatar"]["variants"][0]["mimetype"],
+                            "location": json_data["response"][0]["avatar"]["variants"][0]["location"],
                             "locations": [{
-                                "locationId": json_data['response'][0]['avatar']['variants'][0]['locations'][0]['locationId'],
-                                "location": json_data['response'][0]['avatar']['variants'][0]['locations'][0]['location'],
+                                "locationId": json_data["response"][0]["avatar"]["variants"][0]["locations"][0]["locationId"],
+                                "location": json_data["response"][0]["avatar"]["variants"][0]["locations"][0]["location"],
                             }]
                       }
                         ]
@@ -63,41 +63,45 @@ async def getAccountData(account_url):
     return metadata
 
 async def getStreamData(stream_url):
-    resolver = aiohttp.resolver.AsyncResolver(nameservers=['8.8.8.8', '8.8.8.4', '1.1.1.1', '1.0.0.2'])
+    resolver = aiohttp.resolver.AsyncResolver(nameservers=["8.8.8.8", "8.8.8.4", "1.1.1.1", "1.0.0.2"])
     connector = aiohttp.TCPConnector(resolver=resolver)
     async with aiohttp.ClientSession(connector=connector, headers=config.headers) as session:
         async with session.get(stream_url) as response:
             data = await response.json()
 
-    last_fetched = data['response']['stream']['lastFetchedAt']
+    last_fetched = data["response"]["stream"]["lastFetchedAt"]
     current_time = int(datetime.now().timestamp() * 1000)
-    access = data['response']['stream']['access']
+    access = data["response"]["stream"]["access"]
 
-    if current_time - last_fetched > 4 * 60 * 1000 or access == False:
+    if current_time - last_fetched > 4 * 60 * 1000 or not access:
         return {"success": False, "response": None}
     else:
-
         metadata = {
-          "success": data['success'],
-          "response": {
-              "id": data['response']['id'],
-              "accountId": data['response']['accountId'],
-              "playbackUrl": data['response']['playbackUrl'],
-              "stream": {
-                  "id": data['response']['stream']['id'],
-                  "title": data['response']['stream']['title'],
-                  "status": data['response']['stream']['status'],
-                  "lastFetchedAt": data['response']['stream']['lastFetchedAt'],
-                  "startedAt": data['response']['stream']['startedAt'],
-                  "playbackUrl": data['response']['stream']['playbackUrl']
-              },
-          }
-      }
+            "success": data["success"],
+            "response": {
+                "id": data["response"]["id"],
+                "accountId": data["response"]["accountId"],
+                "playbackUrl": data["response"]["playbackUrl"],
+                "createdAt": data["response"]["createdAt"],
+                "stream": {
+                    "id": data["response"]["stream"]["id"],
+                    "title": data["response"]["stream"]["title"],
+                    "status": data["response"]["stream"]["status"],
+                    "viewerCount": data["response"]["stream"]["viewerCount"],
+                    "version": data["response"]["stream"]["version"],
+                    "createdAt": data["response"]["stream"]["createdAt"],
+                    "lastFetchedAt": data["response"]["stream"]["lastFetchedAt"],
+                    "startedAt": data["response"]["stream"]["startedAt"],
+                    "access": data["response"]["stream"]["access"],
+                    "playbackUrl": data["response"]["stream"].get("playbackUrl", None),
+                },
+            },
+        }
     #print(metadata)
     return metadata
 
 async def ffmpegSync(filename, data, user_Data):
-    directory = os.path.join('./captures', user_Data["response"][0]['username'])
+    directory = os.path.join("./captures", user_Data["response"][0]["username"])
     os.makedirs(directory, exist_ok=True)
     ts_filename = os.path.join(directory, f"{filename}.ts")
     print(f"[ffmpeg] Saving livestream to {ts_filename}")
@@ -132,7 +136,7 @@ async def convertToMP4(ts_filename):
             webhook = DiscordWebhook(url=webhook_url)
         # Set message content
             mp4_name = os.path.basename(mp4_filename)
-            webhook.content = f"Converted {filename}.ts to {mp4_name}"
+            webhook.content = f"Converted {ts_filename} to {mp4_name}"
             response = webhook.execute()
             if response.status_code == 200:
                 print(f"[info] Sent Discord notification that {ts_filename} was converted to {mp4_name}")
@@ -168,13 +172,13 @@ async def uploadRecording(mp4_filename, contact_sheet_filename):
             mention = config.webhooks.webhook_mention 
         
             # Create DiscordEmbed object
-            embed = DiscordEmbed(title='Stream Recording Uploaded', description=f'Uploaded {mp4_name} with contact sheet {sheet_name}', color='03b2f8')
+            embed = DiscordEmbed(title="Stream Recording Uploaded", description=f'Uploaded {mp4_name} with contact sheet {sheet_name}', color="03b2f8")
             embed.set_image(url=f"attachment://{sheet_name}")
             embed.set_timestamp()
         
             # Add message and embed to webhook
             webhook.content = f"{mention} Vod Uploaded"
-            webhook.add_file(file=open(contact_sheet_filename, 'rb'), filename=sheet_name)
+            webhook.add_file(file=open(contact_sheet_filename, "rb"), filename=sheet_name)
             webhook.add_embed(embed)
 
             # Send webhook message
@@ -190,7 +194,7 @@ async def uploadRecording(mp4_filename, contact_sheet_filename):
 
 async def startRecording(user_Data, data):
     global checkTimeout
-    current_datetime = datetime.now().strftime('%Y%m%d_%H%M%S')
+    current_datetime = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"{user_Data['response'][0]['username']}_{current_datetime}_v{data['response']['stream']['id']}"
     
     ts_filename = await ffmpegSync(filename, data, user_Data)
@@ -198,15 +202,15 @@ async def startRecording(user_Data, data):
     # Convert .ts file to .mp4
     mp4_filename = await convertToMP4(ts_filename)
 
-    if config.mt == True:
+    if config.mt:
         contact_sheet_filename = await generateContactSheet(mp4_filename)
 
-    if config.upload == True and config.mt == True:
+    if config.upload is True and config.mt is True:
         await uploadRecording(mp4_filename, contact_sheet_filename)
-    elif config.upload == True:
+    elif config.upload is True:
         await uploadRecording(mp4_filename)
 
-    if config.ffmpeg_convert == True:
+    if config.ffmpeg_convert is True:
         # Delete the .ts file
         #ts_filename = f"{filename}.ts"
         os.remove(ts_filename)
@@ -240,18 +244,18 @@ async def Start():
         return
 
     username = sys.argv[1]   
-    account_url = f'https://apiv3.fansly.com/api/v1/account?usernames={username}&ngsw-bypass=true'
+    account_url = f"https://apiv3.fansly.com/api/v1/account?usernames={username}&ngsw-bypass=true"
 
     user_Data = await getAccountData(account_url)
-    account_id = user_Data['response'][0]['id']
+    account_id = user_Data["response"][0]["id"]
     
-    stream_url = f'https://apiv3.fansly.com/api/v1/streaming/channel/{account_id}?ngsw-bypass=true'
+    stream_url = f"https://apiv3.fansly.com/api/v1/streaming/channel/{account_id}?ngsw-bypass=true"
     print(f"[info] Starting online check for {user_Data['response'][0]['username']}")
 
     while True:
         data = await getStreamData(stream_url)
 
-        if data is not None and data['success'] and data['response']['stream']['access']:
+        if data is not None and data["success"] and data["response"]["stream"]["access"]:
             if config.webhooks.enabled == True:
                 await sendWebhookLive(user_Data)
                 await startRecording(user_Data, data)
