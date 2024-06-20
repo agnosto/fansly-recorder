@@ -24,7 +24,9 @@ rcloneRemotePath = "remote:FanslyVODS/"
 checkTimeout = (5 * 60)
 
 async def getAccountData(account_url):
-    resolver = aiohttp.resolver.AsyncResolver(nameservers=["8.8.8.8", "8.8.8.4", "1.1.1.1", "1.0.0.2"])
+    resolver = aiohttp.resolver.AsyncResolver(
+            nameservers=["8.8.8.8", "8.8.8.4", "1.1.1.1", "1.0.0.2"]
+    )
     connector = aiohttp.TCPConnector(resolver=resolver)    
     async with aiohttp.ClientSession(connector=connector, headers=config.headers) as session:
         async with session.get(account_url) as response:
@@ -63,7 +65,9 @@ async def getAccountData(account_url):
     return metadata
 
 async def getStreamData(stream_url):
-    resolver = aiohttp.resolver.AsyncResolver(nameservers=["8.8.8.8", "8.8.8.4", "1.1.1.1", "1.0.0.2"])
+    resolver = aiohttp.resolver.AsyncResolver(
+            nameservers=["8.8.8.8", "8.8.8.4", "1.1.1.1", "1.0.0.2"]
+    )
     connector = aiohttp.TCPConnector(resolver=resolver)
     async with aiohttp.ClientSession(connector=connector, headers=config.headers) as session:
         async with session.get(stream_url) as response:
@@ -71,7 +75,7 @@ async def getStreamData(stream_url):
 
     last_fetched = data["response"]["stream"]["lastFetchedAt"]
     current_time = int(datetime.now().timestamp() * 1000)
-    access = data["response"]["stream"]["access"]
+    access = (data["response"]["stream"]["access"],)
 
     if current_time - last_fetched > 4 * 60 * 1000 or not access:
         return {"success": False, "response": None}
@@ -141,7 +145,9 @@ async def convertToMP4(ts_filename):
             if response.status_code == 200:
                 print(f"[info] Sent Discord notification that {ts_filename} was converted to {mp4_name}")
             else:
-                print(f"[warning] Failed to send webhook notification: {response.status_code} {response.reason}")
+                print(
+                    f"[warning] Failed to send webhook notification: {response.status_code} {response.reason}"
+                )
         return mp4_filename
     else:
         return mp4_filename
@@ -186,7 +192,9 @@ async def uploadRecording(mp4_filename, contact_sheet_filename):
             if response.status_code == 200:
                 print(f"[info] Sent Discord notification that {mp4_name} was uploaded")
             else:
-                print(f"[warning] Failed to send webhook notification: {response.status_code} {response.reason}")
+                print(
+                    f"[warning] Failed to send webhook notification: {response.status_code} {response.reason}"
+                )
     
     if config.mt == True:
         rclone.with_config(rcloneConfig).run_cmd(command="move", extra_args=[contact_sheet_filename, rcloneRemotePath])
@@ -226,17 +234,26 @@ async def sendWebhookLive(user_Data):
     mention = config.webhooks.webhook_mention
     content = f"{mention} {user_Data['response'][0]['username']} is now live on Fansly!"
     embed_live = DiscordEmbed(title='Stream Live!', color='03b2f8', url=live_url,)
-    embed_live.set_author(name=f"{user_Data['response'][0]['username']}", icon_url=f"{user_Data['response'][0]['avatar']['variants'][0]['locations'][0]['location']}")
-    embed_live.set_thumbnail(url=f"{user_Data['response'][0]['avatar']['variants'][0]['locations'][0]['location']}")
+    embed_live.set_author(
+        name=f"{user_Data['response'][0]['username']}", 
+        icon_url=f"{user_Data['response'][0]['avatar']['variants'][0]['locations'][0]['location']}"
+    )
+    embed_live.set_thumbnail(
+        url=f"{user_Data['response'][0]['avatar']['variants'][0]['locations'][0]['location']}"
+    )
     embed_live.set_timestamp()
     webhook.add_embed(embed_live)
     webhook.content = content
 
     response = webhook.execute()
     if response.status_code == 200:
-        print(f"[info] {user_Data['response'][0]['username']} Stream is online, starting archiver")
+        print(
+            f"[info] {user_Data['response'][0]['username']} Stream is online, starting archiver"
+        )
     else:
-        print(f"[warning] Failed to send webhook notification: {response.status_code} {response.reason}")
+        print(
+            f"[warning] Failed to send webhook notification: {response.status_code} {response.reason}"
+        )
 
 async def Start():
     if len(sys.argv) < 2:
@@ -244,7 +261,9 @@ async def Start():
         return
 
     username = sys.argv[1]   
-    account_url = f"https://apiv3.fansly.com/api/v1/account?usernames={username}&ngsw-bypass=true"
+    account_url = (
+        f"https://apiv3.fansly.com/api/v1/account?usernames={username}&ngsw-bypass=true"
+    )
 
     user_Data = await getAccountData(account_url)
     account_id = user_Data["response"][0]["id"]
@@ -255,15 +274,23 @@ async def Start():
     while True:
         data = await getStreamData(stream_url)
 
-        if data is not None and data["success"] and data["response"]["stream"]["access"]:
+        if (
+            data is not None 
+            and data["success"] 
+            and data["response"]["stream"]["access"]
+        ):
             if config.webhooks.enabled == True:
                 await sendWebhookLive(user_Data)
                 await startRecording(user_Data, data)
             else:
-                print(f"[info] {user_Data['response'][0]['username']} Stream is online, starting archiver")
+                print(
+                    f"[info] {user_Data['response'][0]['username']} Stream is online, starting archiver"
+                )
                 await startRecording(user_Data, data)
         else:
-            print(f"[info] {user_Data['response'][0]['username']} is offline, checking again in {checkTimeout}s")
+            print(
+                f"[info] {user_Data['response'][0]['username']} is offline, checking again in {checkTimeout}s"
+            )
             await asyncio.sleep(checkTimeout)
 
 asyncio.run(Start())
