@@ -94,7 +94,7 @@ async def getStreamData(stream_url):
     current_time = int(datetime.now().timestamp() * 1000)
     access = (data["response"]["stream"]["access"],)
 
-    if current_time - last_fetched > 4 * 60 * 1000 or not access:
+    if current_time - last_fetched > 2 * 60 * 1000 or not access:
         return {"success": False, "response": None}
     else:
         metadata = {

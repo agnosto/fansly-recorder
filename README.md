@@ -81,7 +81,7 @@ Instead of clicking Network tab, go to Storage -> Local Storage -> https://fansl
 
 # Running
 
-The script will continue to loop and check for the model to be live every 5 minutes and then start to record, once finished it will push the file to the remote and go back to checking for the model to be live again.
+The script will continue to loop and check for the model to be live every 2 minutes and 10 seconds and then start to record, once finished it will push the file to the remote and go back to checking for the model to be live again.
 
 
 Run the script:
