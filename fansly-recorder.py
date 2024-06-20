@@ -21,7 +21,7 @@ token = THIS
 """
 rcloneRemotePath = "remote:FanslyVODS/"
 
-checkTimeout = (5 * 60)
+checkTimeout = (2 * 65)
 
 async def getAccountData(account_url):
     resolver = aiohttp.resolver.AsyncResolver(
@@ -35,7 +35,7 @@ async def getAccountData(account_url):
                 print("Error: could not retrieve account data")
                 exit()
             #account_id = json_data['response'][0]['id']
-    #return account_id            
+            #return account_id            
             metadata = {
               "success": json_data["success"],
               "response": [
@@ -48,12 +48,25 @@ async def getAccountData(account_url):
                         "location": json_data["response"][0]["avatar"]["location"],
                         "variants": [
                             {
-                            "id": json_data["response"][0]["avatar"]["variants"][0]["id"],
-                            "mimetype": json_data["response"][0]["avatar"]["variants"][0]["mimetype"],
-                            "location": json_data["response"][0]["avatar"]["variants"][0]["location"],
-                            "locations": [{
-                                "locationId": json_data["response"][0]["avatar"]["variants"][0]["locations"][0]["locationId"],
-                                "location": json_data["response"][0]["avatar"]["variants"][0]["locations"][0]["location"],
+                            "id": json_data["response"][0]["avatar"]["variants"][0].get("id", None),
+                            "mimetype": json_data["response"][0]["avatar"][
+                                "variants"
+                            ][0].get("mimetype", None),
+                            "location": json_data["response"][0]["avatar"][
+                                "variants"
+                            ][0].get("location", None),
+                            "locations": [
+                              {
+                                "locationId": json_data["response"][0][
+                                    "avatar"
+                                ]["variants"][0]["locations"][0].get(
+                                    "locationId", None
+                                ),
+                                "location": json_data["response"][0][
+                                    "avatar"
+                                ]["variants"][0]["locations"][0].get(
+                                    "location", None
+                                ),
                             }]
                       }
                         ]
