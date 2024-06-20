@@ -36,7 +36,7 @@ async def getAccountData(account_url):
                 exit()
             #account_id = json_data['response'][0]['id']
             #return account_id            
-           metadata = {
+            metadata = {
                 "success": json_data["success"],
                 "response": [
                     {
