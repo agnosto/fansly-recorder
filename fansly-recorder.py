@@ -36,44 +36,48 @@ async def getAccountData(account_url):
                 exit()
             #account_id = json_data['response'][0]['id']
             #return account_id            
-            metadata = {
-              "success": json_data["success"],
-              "response": [
-                  {
-                      "id": json_data["response"][0]["id"],
-                      "username": json_data["response"][0]["username"],
-                      "avatar": {
-                        "id": json_data["response"][0]["avatar"]["id"],
-                        "mimetype": json_data["response"][0]["avatar"]["mimetype"],
-                        "location": json_data["response"][0]["avatar"]["location"],
-                        "variants": [
-                            {
-                            "id": json_data["response"][0]["avatar"]["variants"][0].get("id", None),
-                            "mimetype": json_data["response"][0]["avatar"][
-                                "variants"
-                            ][0].get("mimetype", None),
-                            "location": json_data["response"][0]["avatar"][
-                                "variants"
-                            ][0].get("location", None),
-                            "locations": [
-                              {
-                                "locationId": json_data["response"][0][
-                                    "avatar"
-                                ]["variants"][0]["locations"][0].get(
-                                    "locationId", None
-                                ),
-                                "location": json_data["response"][0][
-                                    "avatar"
-                                ]["variants"][0]["locations"][0].get(
-                                    "location", None
-                                ),
-                            }]
-                      }
-                        ]
-                      }
-                  }
-              ]
-          }
+           metadata = {
+                "success": json_data["success"],
+                "response": [
+                    {
+                        "id": json_data["response"][0]["id"],
+                        "username": json_data["response"][0]["username"],
+                        "avatar": {
+                            "id": json_data["response"][0]["avatar"]["id"],
+                            "mimetype": json_data["response"][0]["avatar"]["mimetype"],
+                            "location": json_data["response"][0]["avatar"]["location"],
+                            "variants": [
+                                {
+                                    "id": json_data["response"][0]["avatar"][
+                                        "variants"
+                                    ][0].get("id", None),
+                                    "mimetype": json_data["response"][0]["avatar"][
+                                        "variants"
+                                    ][0].get("mimetype", None),
+                                    "location": json_data["response"][0]["avatar"][
+                                        "variants"
+                                    ][0].get("location", None),
+                                    "locations": [
+                                        {
+                                            "locationId": json_data["response"][0][
+                                                "avatar"
+                                            ]["variants"][0]["locations"][0].get(
+                                                "locationId", None
+                                            ),
+                                            "location": json_data["response"][0][
+                                                "avatar"
+                                            ]["variants"][0]["locations"][0].get(
+                                                "location", None
+                                            ),
+                                        }
+                                    ],
+                                },
+                            ],
+                        },
+                    }
+                ],
+            }
+
 
     return metadata
 
