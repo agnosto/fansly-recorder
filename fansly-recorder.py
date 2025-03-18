@@ -1,7 +1,6 @@
 import aiohttp
 import asyncio
 from datetime import datetime
-import ffmpeg
 import sys
 import rclone 
 import os
@@ -135,17 +134,11 @@ async def ffmpegSync(filename, data, user_Data):
 
 async def convertToMP4(ts_filename):
     mp4_filename = ts_filename.rsplit('.', 1)[0] + '.mp4'
-    #ts_filename = f"{filename}.ts"
-    #mp4_filename = f"{filename}.mp4"
 
     if config.ffmpeg_convert == True:
-        (
-            ffmpeg
-            .input(ts_filename, re=None)
-            .output(mp4_filename, vcodec='copy', acodec='copy')
-            .global_args('-loglevel', 'quiet')
-            .run()
-        )
+        # Use subprocess instead of ffmpeg-python
+        command = f'ffmpeg -i "{ts_filename}" -c:v copy -c:a copy -loglevel quiet "{mp4_filename}"'
+        subprocess.run(command, shell=True, check=True)
     else:
         os.rename(ts_filename, mp4_filename)
 
